@@ -1,4 +1,7 @@
+import random
+
 import numpy as np
+import pandas as pd
 
 
 class RidgeRegression:
@@ -76,9 +79,12 @@ class LogisticRegressionSGD:
         self.W = np.random.normal(0, 1, m)  # начальная инициализация весов
 
         for _ in range(self.epochs):
-            indices = np.random.permutation(n)  # перемешивание индексов для случайного порядка
-            X_shuffled = X[indices]
-            y_shuffled = y[indices]
+            Y = y.reset_index(drop=True)
+
+            # Перемешиваем данные
+            indices = np.random.permutation(len(X))
+            X_shuffled = X.iloc[indices] if isinstance(X, pd.DataFrame) else X[indices]
+            y_shuffled = Y.iloc[indices] if isinstance(Y, pd.Series) else Y[indices]
 
             for i in range(0, n, self.batch_size):
                 X_batch = X_shuffled[i:i + self.batch_size]
