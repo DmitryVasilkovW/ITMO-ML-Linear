@@ -1,47 +1,48 @@
 import numpy as np
 
 
-class SVMClassifier:
-    def __init__(self, kernel="linear", C=1.0, learning_rate=0.01, epochs=1000):
-        self.kernel = kernel
+class SVM:
+    def __init__(self, C=1.0, alpha=0.01, iterations=1000, kernel='linear', degree=3, gamma='scale'):
         self.C = C
-        self.learning_rate = learning_rate
-        self.epochs = epochs
-        self.weights = None
-        self.bias = 0
-
-    def _linear_kernel(self, X):
-        return X
-
-    def _polynomial_kernel(self, X, degree=3):
-        return X ** degree
-
-    def _rbf_kernel(self, X, gamma=0.1):
-        return np.exp(-gamma * (X ** 2).sum(axis=1))
-
-    def _compute_kernel(self, X):
-        if self.kernel == "linear":
-            return self._linear_kernel(X)
-        elif self.kernel == "polynomial":
-            return self._polynomial_kernel(X)
-        elif self.kernel == "rbf":
-            return self._rbf_kernel(X)
-        else:
-            raise ValueError("Unknown kernel")
+        self.alpha = alpha
+        self.iterations = iterations
+        self.kernel = kernel
+        self.degree = degree
+        self.gamma = gamma
+        self.W = None
+        self.b = 0
 
     def fit(self, X, y):
-        n_samples, n_features = X.shape
-        self.weights = np.zeros(n_features)
-        self.bias = 0
+        y = np.where(y == 1, 1, -1)
+        n, m = X.shape
+        self.W = np.zeros(m)
+        self.b = 0
 
-        for epoch in range(self.epochs):
-            for i in range(n_samples):
-                condition = y[i] * (np.dot(self.weights, X[i]) + self.bias) >= 1
-                if condition:
-                    self.weights -= self.learning_rate * (2 * 1 / self.epochs * self.weights)
+        for epoch in range(self.iterations):
+            for i in range(n):
+                condition = y[i] * (self.kernel_function(X[i]) + self.b)
+                if condition < 1:
+                    self.W += self.alpha * (self.C * y[i] * X[i] - 2 * self.W)
+                    self.b += self.alpha * self.C * y[i]
                 else:
-                    self.weights -= self.learning_rate * (2 * 1 / self.epochs * self.weights - np.dot(X[i], y[i]))
-                    self.bias -= self.learning_rate * y[i]
+                    self.W -= self.alpha * 2 * self.W
+
+    def kernel_function(self, x):
+        if self.kernel == 'linear':
+            return np.dot(self.W, x)
+        elif self.kernel == 'polynomial':
+            return (np.dot(self.W, x) + 1) ** self.degree
+        elif self.kernel == 'rbf':
+            if self.gamma == 'scale':
+                if self.W.shape[0] > 0:
+                    gamma_value = 1 / (self.W.shape[0] * np.var(self.W) if np.var(self.W) > 0 else 1.0)
+                else:
+                    gamma_value = 1.0
+            else:
+                gamma_value = self.gamma
+            return np.exp(-gamma_value * np.linalg.norm(self.W - x) ** 2)
+        else:
+            raise ValueError("Неизвестное ядро: {}".format(self.kernel))
 
     def predict(self, X):
-        return np.sign(np.dot(X, self.weights) + self.bias)
+        return np.sign(np.dot(X, self.W) + self.b)

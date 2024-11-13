@@ -1,21 +1,26 @@
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/tic-tac-toe/tic-tac-toe.data"
 
-def load_and_preprocess_data(url):
+
+def get_data():
     data = pd.read_csv(url, header=None)
-    X = data.iloc[:, 2:].values  # признаки
-    y = data.iloc[:, 1].values  # метки
 
-    # Преобразование меток в бинарный вид (+1, -1)
-    y = np.where(y == 'M', 1, -1)
+    data.columns = [
+        'top-left-square', 'top-middle-square', 'top-right-square',
+        'middle-left-square', 'middle-middle-square', 'middle-right-square',
+        'bottom-left-square', 'bottom-middle-square', 'bottom-right-square',
+        'Class'
+    ]
 
-    # Нормализация данных
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
+    data.replace({'x': 1, 'o': 0, 'b': -1}, inplace=True)
 
-    # Разделение на обучающую и тестовую выборки
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    return X_train, X_test, y_train, y_test
+    data['Class'] = data['Class'].apply(lambda x: 1 if x == 'positive' else -1)
+
+    return data
+
+
+def accuracy_metric(y_true, y_pred):
+    y_pred = np.where(y_pred >= 0, 1, -1)
+    return np.mean(y_true == y_pred)
