@@ -13,6 +13,7 @@ best_alpha_logistic = HyperparameterSelection.get_best_alpha_logistic(x_train, y
 best_c_svm = HyperparameterSelection.get_best_c_svm(x_train, y_train, x_test, y_test)
 best_kernel_svm = HyperparameterSelection.get_best_kernel_svm(x_train, y_train, x_test, y_test)
 best_alpha_ridge = HyperparameterSelection.get_best_alpha_ridge(x_train, y_train, x_test, y_test)
+best_alpha_svm = HyperparameterSelection.get_best_alpha_svm(x_train, y_train, x_test, y_test)
 
 type_of_handling = "parallel"
 type_of_regression = "reg"
@@ -26,7 +27,8 @@ results = TrainingResults(
     best_alpha_logistic,
     best_c_svm,
     best_kernel_svm,
-    best_alpha_ridge
+    best_alpha_ridge,
+    best_alpha_svm,
 )
 
 results.show_results(type_of_handling, type_of_regression)

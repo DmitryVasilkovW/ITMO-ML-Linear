@@ -10,6 +10,7 @@ def show_best_params(x_train, y_train, x_test, y_test):
     best_c_svm = params.get_best_c_svm(x_train, y_train, x_test, y_test)
     best_kernel_svm = params.get_best_kernel_svm(x_train, y_train, x_test, y_test)
     best_accuracy_svm = params.get_best_accuracy_svm(x_train, y_train, x_test, y_test)
+    best_alpha_svm = params.get_best_alpha_svm(x_train, y_train, x_test, y_test)
 
     _print_params(
         best_alpha_ridge,
@@ -18,7 +19,8 @@ def show_best_params(x_train, y_train, x_test, y_test):
         best_accuracy_logistic,
         best_c_svm,
         best_kernel_svm,
-        best_accuracy_svm
+        best_accuracy_svm,
+        best_alpha_svm
     )
 
 
@@ -29,7 +31,8 @@ def _print_params(
         best_accuracy_logistic,
         best_c_svm,
         best_kernel_svm,
-        best_accuracy_svm
+        best_accuracy_svm,
+        best_alpha_svm
 ):
     print(
         f'Best alpha for Ridge Regression: {best_alpha_ridge},'
@@ -40,3 +43,4 @@ def _print_params(
     print(
         f'Best C for SVM: {best_c_svm}, Best kernel: {best_kernel_svm},'
         f' Best accuracy: {best_accuracy_svm:.2f}')
+    print(f'Best alpha for SVM: {best_alpha_svm}')

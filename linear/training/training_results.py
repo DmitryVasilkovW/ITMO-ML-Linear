@@ -20,7 +20,8 @@ class TrainingResults:
             best_alpha_logistic,
             best_c_svm,
             best_kernel_svm,
-            best_alpha_ridge
+            best_alpha_ridge,
+            best_alpha_svm
     ):
         self._x_train = x_train
         self._y_train = y_train
@@ -30,12 +31,13 @@ class TrainingResults:
         self._best_c_svm = best_c_svm
         self._best_kernel_svm = best_kernel_svm
         self._best_alpha_ridge = best_alpha_ridge
+        self._best_alpha_svm = best_alpha_svm
         self._label_for_regression_plot = 'Learning Curve for Logistic Regression with Intervals'
         self._label_for_svm_classification_plot = 'Learning Curve for SVM with Intervals'
 
     def show_results(self, type_of_handling, type_of_regression):
         train_sizes = np.linspace(0.1, 0.9, num=5)
-        n_iterations = 10
+        n_iterations = 20
 
         ridge_model = RidgeRegression(alpha=self._best_alpha_ridge)
         ridge_model.fit(self._x_train, self._y_train)
@@ -51,9 +53,9 @@ class TrainingResults:
              train_scores_svm,
              test_scores_svm) = self._sequential_handling(train_sizes, n_iterations, type_of_regression)
 
-        self._get_plot(train_sizes, train_scores_log_reg, test_scores_log_reg,
+        self._get_plot(train_scores_log_reg, test_scores_log_reg,
                        self._label_for_regression_plot, ridge_model)
-        self._get_plot(train_sizes, train_scores_svm, test_scores_svm,
+        self._get_plot(train_scores_svm, test_scores_svm,
                        self._label_for_svm_classification_plot, ridge_model, True)
 
     def _train(self, train_size, model_type):
@@ -89,7 +91,7 @@ class TrainingResults:
         return train_score, test_score
 
     def _svm_score_handler(self, x_train_subset, y_train_subset):
-        svm = SVM(C=self._best_c_svm, alpha=0.01, iterations=1000, kernel=self._best_kernel_svm)
+        svm = SVM(C=self._best_c_svm, alpha=self._best_alpha_svm, iterations=1000, kernel=self._best_kernel_svm)
         svm.fit(x_train_subset, 2 * y_train_subset - 1)
         train_score = accuracy_metric(2 * y_train_subset - 1, svm.predict(x_train_subset))
         test_score = accuracy_metric(2 * self._y_test - 1, svm.predict(self._x_test))
@@ -148,21 +150,33 @@ class TrainingResults:
 
         return train_scores_log_reg, test_scores_log_reg, train_scores_svm, test_scores_svm
 
-    def _get_plot(self, train_sizes, train_scores, test_scores, title, ridge_model,
-                  add_ridge_predictions=False):
+    def _get_plot(self, train_scores, test_scores, title, ridge_model, add_ridge_predictions=False):
         train_scores = np.array(train_scores)
         test_scores = np.array(test_scores)
 
-        train_mean = np.mean(train_scores, axis=1)
-        train_std = np.std(train_scores, axis=1)
-        test_mean = np.mean(test_scores, axis=1)
-        test_std = np.std(test_scores, axis=1)
+        n_iterations = train_scores.shape[1]
+        confidence_coef = 1.96
 
-        plt.plot(train_sizes, train_mean, 'o-', color='r', label='Train (Accuracy)')
-        plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color='r')
+        train_mean = np.mean(train_scores, axis=0)
+        test_mean = np.mean(test_scores, axis=0)
 
-        plt.plot(train_sizes, test_mean, 'o-', color='g', label='Test (Accuracy)')
-        plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color='g')
+        train_std = np.std(train_scores, axis=0)
+        test_std = np.std(test_scores, axis=0)
+        train_stderr = train_std / np.sqrt(n_iterations)
+        test_stderr = test_std / np.sqrt(n_iterations)
+
+        train_conf_interval = confidence_coef * train_stderr
+        test_conf_interval = confidence_coef * test_stderr
+
+        iterations = range(n_iterations)
+
+        plt.plot(iterations, train_mean, 'o-', color='r', label='Train (Accuracy)')
+        plt.fill_between(iterations, train_mean - train_conf_interval, train_mean + train_conf_interval,
+                         alpha=0.2, color='r', label='Train 95% CI')
+
+        plt.plot(iterations, test_mean, 'o-', color='g', label='Test (Accuracy)')
+        plt.fill_between(iterations, test_mean - test_conf_interval, test_mean + test_conf_interval,
+                         alpha=0.2, color='g', label='Test 95% CI')
 
         if add_ridge_predictions:
             ridge_predictions = ridge_model.predict(self._x_test)
@@ -170,8 +184,9 @@ class TrainingResults:
             plt.axhline(y=ridge_test_accuracy, color='b', linestyle='--', label='Ridge Test Accuracy')
 
         plt.title(title)
-        plt.xlabel('Training Size')
+        plt.xlabel('Iterations')
         plt.ylabel('Accuracy')
         plt.legend(loc='best')
         plt.grid()
         plt.show()
+
