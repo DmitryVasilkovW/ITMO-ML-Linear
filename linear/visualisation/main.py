@@ -1,5 +1,6 @@
 from linear.dataset.data import get_data
 from linear.dataset.select_data import DataProcessor
+from linear.hyperparameter_selection.cli_render import show_best_params
 from linear.hyperparameter_selection.hyperparameter import HyperparameterSelection
 from linear.utils.training_utils import tmp
 
@@ -15,4 +16,5 @@ best_c_svm = HyperparameterSelection.get_best_c_svm(x_train, y_train, x_test, y_
 best_kernel_svm = HyperparameterSelection.get_best_kernel_svm(x_train, y_train, x_test, y_test)
 best_alpha_ridge = HyperparameterSelection.get_best_alpha_ridge(x_train, y_train, x_test, y_test)
 
+show_best_params(x_train, y_train, x_test, y_test)
 tmp(x_train, y_train, x_test, y_test, best_alpha_logistic, best_c_svm, best_kernel_svm, best_alpha_ridge)
