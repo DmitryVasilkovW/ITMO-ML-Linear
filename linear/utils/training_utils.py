@@ -9,21 +9,21 @@ from linear.regression.logistic_regression_gd import LogisticRegressionGD
 from linear.regression.ridge_regression import RidgeRegression
 
 
-def train_and_evaluate_iteration(train_size, model_type, X_train, y_train, X_test, y_test, best_alpha_logistic,
-                                 best_C_svm, best_kernel_svm):
-    X_train_subset, _, y_train_subset, _ = train_test_split(X_train, y_train, train_size=train_size, random_state=None)
+def train_and_evaluate_iteration(train_size, model_type, x_train, y_train, x_test, y_test, best_alpha_logistic,
+                                 best_c_svm, best_kernel_svm):
+    x_train_subset, _, y_train_subset, _ = train_test_split(x_train, y_train, train_size=train_size, random_state=None)
 
     if model_type == 'log_reg':
         log_reg = LogisticRegressionGD(alpha=best_alpha_logistic, iterations=1000, penalty='l2')
-        log_reg.fit(X_train_subset, y_train_subset)
-        train_score = accuracy_metric(y_train_subset, log_reg.predict(X_train_subset))
-        test_score = accuracy_metric(y_test, log_reg.predict(X_test))
+        log_reg.fit(x_train_subset, y_train_subset)
+        train_score = accuracy_metric(y_train_subset, log_reg.predict(x_train_subset))
+        test_score = accuracy_metric(y_test, log_reg.predict(x_test))
 
     elif model_type == 'svm':
-        svm = SVM(C=best_C_svm, alpha=0.01, iterations=1000, kernel=best_kernel_svm)
-        svm.fit(X_train_subset, 2 * y_train_subset - 1)
-        train_score = accuracy_metric(2 * y_train_subset - 1, svm.predict(X_train_subset))
-        test_score = accuracy_metric(2 * y_test - 1, svm.predict(X_test))
+        svm = SVM(C=best_c_svm, alpha=0.01, iterations=1000, kernel=best_kernel_svm)
+        svm.fit(x_train_subset, 2 * y_train_subset - 1)
+        train_score = accuracy_metric(2 * y_train_subset - 1, svm.predict(x_train_subset))
+        test_score = accuracy_metric(2 * y_test - 1, svm.predict(x_test))
 
     return train_score, test_score
 
