@@ -6,15 +6,15 @@ class RidgeRegression:
         self.alpha = alpha
         self.W = None
 
-    def fit(self, X, y):
-        n, m = X.shape
-        X_b = np.c_[np.ones((n, 1)), X]
-        self.W = np.linalg.inv(X_b.T @ X_b + self.alpha * np.eye(m + 1)) @ X_b.T @ y
+    def fit(self, x, y):
+        n, m = x.shape
+        x_b = np.c_[np.ones((n, 1)), x]
+        self.W = np.linalg.inv(x_b.T @ x_b + self.alpha * np.eye(m + 1)) @ x_b.T @ y
 
-    def predict(self, X):
-        X_b = np.c_[np.ones((X.shape[0], 1)), X]
-        return X_b @ self.W
+    def predict(self, x):
+        x_b = np.c_[np.ones((x.shape[0], 1)), x]
+        return x_b @ self.W
 
-    def predict_classes(self, X):
-        predictions = self.predict(X)
+    def predict_classes(self, x):
+        predictions = self.predict(x)
         return np.where(predictions >= 0, 1, -1)

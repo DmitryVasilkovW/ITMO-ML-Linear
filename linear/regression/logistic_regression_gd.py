@@ -1,6 +1,10 @@
 import numpy as np
 
-from linear.utils.regressions_utils import penalty_handler
+from linear.utils.regressions_utils import (penalty_handler,
+                                            logistic_risk_handler,
+                                            hinge_risk_handler,
+                                            log_risk_handler,
+                                            sigmoid)
 
 
 class LogisticRegressionGD:
@@ -9,34 +13,27 @@ class LogisticRegressionGD:
         self.iterations = iterations
         self.penalty = penalty
         self.risk = risk
-        self.W = None
+        self.w = None
 
     def fit(self, x, y):
         n, m = x.shape
-        self.W = np.zeros(m)
+        self.w = np.zeros(m)
         self._set_weights(x, y, n)
 
     def _set_weights(self, x, y, n):
         for _ in range(self.iterations):
             if self.risk == 'logistic':
-                predictions = self.sigmoid(x @ self.W)
-                gradient = x.T @ (predictions - y) / n
+                gradient = logistic_risk_handler(x, y, self.w, n)
             elif self.risk == 'hinge':
-                margins = 1 - y * (x @ self.W)
-                gradient = -x.T @ (y * (margins > 0)) / n
+                gradient = hinge_risk_handler(x, y, self.w, n)
             elif self.risk == 'log':
-                predictions = self.sigmoid(x @ self.W)
-                gradient = x.T @ (predictions - y) / n
+                gradient = log_risk_handler(x, y, self.w, n)
 
-            gradient = penalty_handler(self.penalty, gradient, self.W)
-            self.W -= self.alpha * gradient
+            gradient = penalty_handler(self.penalty, gradient, self.w)
+            self.w -= self.alpha * gradient
 
     def predict(self, x):
-        return self.sigmoid(x @ self.W)
-
-    @staticmethod
-    def sigmoid(z):
-        return 1 / (1 + np.exp(-z))
+        return sigmoid(x @ self.w)
 
     def predict_classes(self, x):
         return (self.predict(x) >= 0.5).astype(int)
