@@ -1,7 +1,7 @@
 from linear.dataset.axis_repo import DataRepoImpl
 from linear.hyperparameter_selection.cli_render import show_best_params
 from linear.hyperparameter_selection.hyperparameter import HyperparameterSelection
-from linear.utils.training_utils import tmp
+from linear.training.training_results import TrainingResults
 
 repo = DataRepoImpl
 x_train = repo.get_axis("x", "train")
@@ -15,9 +15,10 @@ best_kernel_svm = HyperparameterSelection.get_best_kernel_svm(x_train, y_train, 
 best_alpha_ridge = HyperparameterSelection.get_best_alpha_ridge(x_train, y_train, x_test, y_test)
 
 type_of_handling = "parallel"
+type_of_regression = "reg"
 
 show_best_params(x_train, y_train, x_test, y_test)
-tmp(
+results = TrainingResults(
     x_train,
     y_train,
     x_test,
@@ -25,6 +26,7 @@ tmp(
     best_alpha_logistic,
     best_c_svm,
     best_kernel_svm,
-    best_alpha_ridge,
-    type_of_handling
+    best_alpha_ridge
 )
+
+results.show_results(type_of_handling, type_of_regression)
