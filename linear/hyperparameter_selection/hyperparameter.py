@@ -1,6 +1,7 @@
-from linear.classifier.regression import RidgeRegression, LogisticRegressionGD
 from linear.classifier.svm_classifier import SVM
 from linear.dataset.data import accuracy_metric
+from linear.regression.logistic_regression_gd import LogisticRegressionGD
+from linear.regression.ridge_regression import RidgeRegression
 
 
 class HyperparameterSelection:

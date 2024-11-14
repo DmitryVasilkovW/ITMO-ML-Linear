@@ -3,9 +3,10 @@ from joblib import Parallel, delayed
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
-from linear.classifier.regression import LogisticRegressionGD, RidgeRegression
 from linear.classifier.svm_classifier import SVM
 from linear.dataset.data import accuracy_metric
+from linear.regression.logistic_regression_gd import LogisticRegressionGD
+from linear.regression.ridge_regression import RidgeRegression
 
 
 def train_and_evaluate_iteration(train_size, model_type, X_train, y_train, X_test, y_test, best_alpha_logistic,
