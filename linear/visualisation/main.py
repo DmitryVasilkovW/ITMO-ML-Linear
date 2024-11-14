@@ -14,5 +14,17 @@ best_c_svm = HyperparameterSelection.get_best_c_svm(x_train, y_train, x_test, y_
 best_kernel_svm = HyperparameterSelection.get_best_kernel_svm(x_train, y_train, x_test, y_test)
 best_alpha_ridge = HyperparameterSelection.get_best_alpha_ridge(x_train, y_train, x_test, y_test)
 
+type_of_handling = "parallel"
+
 show_best_params(x_train, y_train, x_test, y_test)
-tmp(x_train, y_train, x_test, y_test, best_alpha_logistic, best_c_svm, best_kernel_svm, best_alpha_ridge)
+tmp(
+    x_train,
+    y_train,
+    x_test,
+    y_test,
+    best_alpha_logistic,
+    best_c_svm,
+    best_kernel_svm,
+    best_alpha_ridge,
+    type_of_handling
+)

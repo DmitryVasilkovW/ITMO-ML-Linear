@@ -1,5 +1,5 @@
 import numpy as np
-from joblib import Parallel, delayed
+from joblib import delayed, Parallel
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
@@ -57,28 +57,75 @@ def plot_learning_curve_with_intervals(train_sizes, train_scores, test_scores, t
     plt.show()
 
 
-def tmp(X_train, y_train, X_test, y_test, best_alpha_logistic, best_C_svm, best_kernel_svm, best_alpha_ridge):
-    train_sizes = np.linspace(0.1, 0.9, num=5)
-    n_iterations = 10
+def sequential_handling(
+        train_sizes,
+        n_iterations,
+        x_train,
+        y_train,
+        x_test,
+        y_test,
+        best_alpha_logistic,
+        best_c_svm,
+        best_kernel_svm
+):
     train_scores_log_reg = []
     test_scores_log_reg = []
     train_scores_svm = []
     test_scores_svm = []
 
-    ridge_model = RidgeRegression(alpha=best_alpha_ridge)
-    ridge_model.fit(X_train, y_train)
+    for train_size in train_sizes:
+        log_reg_train_scores = []
+        log_reg_test_scores = []
+        svm_train_scores = []
+        svm_test_scores = []
+
+        for _ in range(n_iterations):
+            train_score, test_score = train_and_evaluate_iteration(train_size, 'log_reg', x_train, y_train, x_test,
+                                                                   y_test,
+                                                                   best_alpha_logistic, best_c_svm, best_kernel_svm)
+            log_reg_train_scores.append(train_score)
+            log_reg_test_scores.append(test_score)
+
+            train_score, test_score = train_and_evaluate_iteration(train_size, 'svm', x_train, y_train, x_test, y_test,
+                                                                   best_alpha_logistic, best_c_svm, best_kernel_svm)
+            svm_train_scores.append(train_score)
+            svm_test_scores.append(test_score)
+
+        train_scores_log_reg.append(log_reg_train_scores)
+        test_scores_log_reg.append(log_reg_test_scores)
+        train_scores_svm.append(svm_train_scores)
+        test_scores_svm.append(svm_test_scores)
+
+    return train_scores_log_reg, test_scores_log_reg, train_scores_svm, test_scores_svm
+
+
+def parallel_handling(
+        train_sizes,
+        n_iterations,
+        x_train,
+        y_train,
+        x_test,
+        y_test,
+        best_alpha_logistic,
+        best_c_svm,
+        best_kernel_svm
+):
+    train_scores_log_reg = []
+    test_scores_log_reg = []
+    train_scores_svm = []
+    test_scores_svm = []
 
     for train_size in train_sizes:
         results_log_reg = Parallel(n_jobs=-1)(
-            delayed(train_and_evaluate_iteration)(train_size, 'log_reg', X_train, y_train, X_test, y_test,
-                                                  best_alpha_logistic, best_C_svm, best_kernel_svm) for _ in
+            delayed(train_and_evaluate_iteration)(train_size, 'log_reg', x_train, y_train, x_test, y_test,
+                                                  best_alpha_logistic, best_c_svm, best_kernel_svm) for _ in
             range(n_iterations))
         log_reg_train_scores, log_reg_test_scores = zip(*results_log_reg)
 
         results_svm = Parallel(n_jobs=-1)(
-            delayed(train_and_evaluate_iteration)(train_size, 'svm', X_train, y_train, X_test, y_test,
+            delayed(train_and_evaluate_iteration)(train_size, 'svm', x_train, y_train, x_test, y_test,
                                                   best_alpha_logistic,
-                                                  best_C_svm, best_kernel_svm) for _ in range(n_iterations))
+                                                  best_c_svm, best_kernel_svm) for _ in range(n_iterations))
         svm_train_scores, svm_test_scores = zip(*results_svm)
 
         train_scores_log_reg.append(log_reg_train_scores)
@@ -86,8 +133,44 @@ def tmp(X_train, y_train, X_test, y_test, best_alpha_logistic, best_C_svm, best_
         train_scores_svm.append(svm_train_scores)
         test_scores_svm.append(svm_test_scores)
 
+    return train_scores_log_reg, test_scores_log_reg, train_scores_svm, test_scores_svm
+
+
+def tmp(x_train, y_train, x_test, y_test, best_alpha_logistic, best_c_svm, best_kernel_svm, best_alpha_ridge,
+        type_of_handling):
+    train_sizes = np.linspace(0.1, 0.9, num=5)
+    n_iterations = 10
+
+    ridge_model = RidgeRegression(alpha=best_alpha_ridge)
+    ridge_model.fit(x_train, y_train)
+
+    if type_of_handling == 'parallel':
+        train_scores_log_reg, test_scores_log_reg, train_scores_svm, test_scores_svm = parallel_handling(
+            train_sizes,
+            n_iterations,
+            x_train,
+            y_train,
+            x_test,
+            y_test,
+            best_alpha_logistic,
+            best_c_svm,
+            best_kernel_svm
+        )
+    else:
+        train_scores_log_reg, test_scores_log_reg, train_scores_svm, test_scores_svm = sequential_handling(
+            train_sizes,
+            n_iterations,
+            x_train,
+            y_train,
+            x_test,
+            y_test,
+            best_alpha_logistic,
+            best_c_svm,
+            best_kernel_svm
+        )
+
     plot_learning_curve_with_intervals(train_sizes, train_scores_log_reg, test_scores_log_reg,
-                                       'Learning Curve for Logistic Regression with Intervals', ridge_model, X_test,
+                                       'Learning Curve for Logistic Regression with Intervals', ridge_model, x_test,
                                        y_test)
     plot_learning_curve_with_intervals(train_sizes, train_scores_svm, test_scores_svm,
-                                       'Learning Curve for SVM with Intervals', ridge_model, X_test, y_test, True)
+                                       'Learning Curve for SVM with Intervals', ridge_model, x_test, y_test, True)

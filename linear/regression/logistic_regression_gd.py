@@ -1,5 +1,7 @@
 import numpy as np
 
+from linear.utils.regressions_utils import penalty_handler
+
 
 class LogisticRegressionGD:
     def __init__(self, alpha=0.01, iterations=1000, penalty='none', risk='logistic'):
@@ -9,35 +11,32 @@ class LogisticRegressionGD:
         self.risk = risk
         self.W = None
 
-    def fit(self, X, y):
-        n, m = X.shape
+    def fit(self, x, y):
+        n, m = x.shape
         self.W = np.zeros(m)
+        self._set_weights(x, y, n)
 
+    def _set_weights(self, x, y, n):
         for _ in range(self.iterations):
             if self.risk == 'logistic':
-                predictions = self.sigmoid(X @ self.W)
-                gradient = X.T @ (predictions - y) / n
+                predictions = self.sigmoid(x @ self.W)
+                gradient = x.T @ (predictions - y) / n
             elif self.risk == 'hinge':
-                margins = 1 - y * (X @ self.W)
-                gradient = -X.T @ (y * (margins > 0)) / n
+                margins = 1 - y * (x @ self.W)
+                gradient = -x.T @ (y * (margins > 0)) / n
             elif self.risk == 'log':
-                predictions = self.sigmoid(X @ self.W)
-                gradient = X.T @ (predictions - y) / n
+                predictions = self.sigmoid(x @ self.W)
+                gradient = x.T @ (predictions - y) / n
 
-            if self.penalty == 'l2':
-                gradient += self.W
-            elif self.penalty == 'l1':
-                gradient += np.sign(self.W)
-            elif self.penalty == 'elastic_net':
-                gradient += self.W + np.sign(self.W)
-
+            gradient = penalty_handler(self.penalty, gradient, self.W)
             self.W -= self.alpha * gradient
 
-    def predict(self, X):
-        return self.sigmoid(X @ self.W)
+    def predict(self, x):
+        return self.sigmoid(x @ self.W)
 
-    def sigmoid(self, z):
+    @staticmethod
+    def sigmoid(z):
         return 1 / (1 + np.exp(-z))
 
-    def predict_classes(self, X):
-        return (self.predict(X) >= 0.5).astype(int)
+    def predict_classes(self, x):
+        return (self.predict(x) >= 0.5).astype(int)
