@@ -1,4 +1,4 @@
-from linear.classifier.svm_classifier import SVM
+from linear.classifier.svm_classifier import SupportVectorMachine
 from linear.dataset.data import accuracy_metric
 from linear.regression.logistic_regression_gd import LogisticRegressionGD
 from linear.regression.ridge_regression import RidgeRegression
@@ -59,7 +59,7 @@ class HyperparameterSelection:
         for alpha in cls._alphas_svm:
             for C in cls._cs:
                 for kernel in cls._kernels:
-                    svm = SVM(C=C, alpha=alpha, kernel=kernel)
+                    svm = SupportVectorMachine(c=C, alpha=alpha, kernel=kernel)
                     svm.fit(cls._x_train, 2 * cls._y_train - 1)
                     y_pred = svm.predict(cls._x_test)
                     accuracy = accuracy_metric(cls._y_test, (y_pred >= 0).astype(int))

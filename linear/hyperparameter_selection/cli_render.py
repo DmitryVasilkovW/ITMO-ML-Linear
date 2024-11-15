@@ -34,13 +34,11 @@ def _print_params(
         best_accuracy_svm,
         best_alpha_svm
 ):
-    print(
-        f'Best alpha for Ridge Regression: {best_alpha_ridge},'
-        f' Best accuracy: {best_accuracy_ridge:.2f}')
-    print(
-        f'Best alpha for Logistic Regression: {best_alpha_logistic},'
-        f' Best accuracy: {best_accuracy_logistic:.2f}')
-    print(
-        f'Best C for SVM: {best_c_svm}, Best kernel: {best_kernel_svm},'
-        f' Best accuracy: {best_accuracy_svm:.2f}')
+    print(f'Best alpha for Ridge Regression: {best_alpha_ridge}')
+    print(f'Best alpha for Logistic Regression: {best_alpha_logistic}')
     print(f'Best alpha for SVM: {best_alpha_svm}')
+    print(f'Best C for SVM: {best_c_svm}')
+    print(f'Best kernel: {best_kernel_svm}')
+    print(f'Best accuracy for Ridge Regression: {best_accuracy_ridge:.2f}')
+    print(f'Best accuracy for Logistic Regression: {best_accuracy_logistic:.2f}')
+    print(f'Best accuracy for SVM: {best_accuracy_svm:.2f}')
