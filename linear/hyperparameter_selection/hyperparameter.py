@@ -19,6 +19,8 @@ class HyperparameterSelection:
     _alphas_svm = [0.01, 0.1]
     _kernels = ['linear', 'polynomial', 'rbf']
     _cs = [0.1]
+    _risk_for_regression = ['logistic', 'hinge', 'log']
+    _penalty_for_regression = ['l1', 'l2', 'elastic_net']
 
     _x_train = None
     _y_train = None
@@ -45,14 +47,16 @@ class HyperparameterSelection:
 
     @classmethod
     def _set_by_alphas_logistic(cls):
-        for alpha in cls._alphas_logistic:
-            log_reg = LogisticRegressionGD(alpha=alpha, iterations=1000, penalty='l2')
-            log_reg.fit(cls._x_train, cls._y_train)
-            y_pred = log_reg.predict_classes(cls._x_test)
-            accuracy = accuracy_metric(cls._y_test, y_pred)
-            if accuracy > cls._best_accuracy_logistic:
-                cls._best_accuracy_logistic = accuracy
-                cls._best_alpha_logistic = alpha
+        for risk in cls._risk_for_regression:
+            for penalty in cls._penalty_for_regression:
+                for alpha in cls._alphas_logistic:
+                    log_reg = LogisticRegressionGD(alpha=alpha, iterations=1000, penalty=penalty, risk=risk)
+                    log_reg.fit(cls._x_train, cls._y_train)
+                    y_pred = log_reg.predict_classes(cls._x_test)
+                    accuracy = accuracy_metric(cls._y_test, y_pred)
+                    if accuracy > cls._best_accuracy_logistic:
+                        cls._best_accuracy_logistic = accuracy
+                        cls._best_alpha_logistic = alpha
 
     @classmethod
     def _set_by_kernels(cls):
