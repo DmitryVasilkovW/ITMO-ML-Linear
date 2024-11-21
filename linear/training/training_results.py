@@ -37,7 +37,7 @@ class TrainingResults:
 
     def show_results(self, type_of_handling, type_of_regression):
         train_sizes = np.linspace(0.1, 0.9, num=5)
-        n_iterations = 20
+        n_iterations = 10
 
         ridge_model = RidgeRegression(alpha=self._best_alpha_ridge)
         ridge_model.fit(self._x_train, self._y_train)
