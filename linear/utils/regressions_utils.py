@@ -27,9 +27,8 @@ def hinge_risk_handler(x, y, w, n):
 
 
 def log_risk_handler(x, y, w, n):
-    predictions = sigmoid(x @ w)
-    gradient = x.T @ (predictions - y) / n
-
+    predictions = np.log(1 + np.exp(-y * (x @ w)))
+    gradient = -x.T @ (y * (1 - predictions)) / n
     return gradient
 
 
